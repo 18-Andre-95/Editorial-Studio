@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Editorial Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:          #F4F3F0;
+  --white:       #FFFFFF;
+  --brown:       #3B2518;
+  --brown2:      #5A3A28;
+  --brown-tint:  #F7F0EB;
+  --brown-dim:   rgba(59,37,24,0.06);
+  --grey:        #5C5C5C;
+  --grey2:       #8C8C8C;
+  --grey3:       #C4C2BE;
+  --grey4:       #E8E6E2;
+  --grey5:       #F0EFEC;
+  --orange:      #CF5A20;
+  --orange2:     #A84418;
+  --orange-tint: #FDF1EB;
+  --orange-dim:  rgba(207,90,32,0.08);
+  --orange-mid:  rgba(207,90,32,0.18);
+  --text:        #1C1A18;
+  --red:         #B53A2A;
+  --green:       #2A7A4A;
+  --font:        'DM Sans', system-ui, sans-serif;
+  --mono:        'DM Mono', monospace;
+  --r:           6px;
+  --r-lg:        10px;
+  --sh:          0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --sh-md:       0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+}
+html { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 13px; -webkit-font-smoothing: antialiased; }
+body { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* ─── HEADER ─── */
+header { display: flex; align-items: center; justify-content: space-between; padding: 0 1.75rem; height: 54px; background: var(--white); border-bottom: 1px solid var(--grey4); box-shadow: var(--sh); position: sticky; top: 0; z-index: 200; }
+.brand { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brown); }
+.brand-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
+.brand em { color: var(--orange); font-style: normal; }
+.key-area { display: flex; align-items: center; gap: 8px; }
+.key-input { font-family: var(--mono); font-size: 11px; background: var(--bg); border: 1px solid var(--grey3); color: var(--text); padding: 6px 10px; border-radius: var(--r); width: 240px; outline: none; }
+.key-input::placeholder { color: var(--grey2); }
+.key-input:focus { border-color: var(--orange); background: var(--white); box-shadow: 0 0 0 3px var(--orange-dim); }
+.key-pill { font-size: 10px; font-weight: 500; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+.key-pill.set   { background: rgba(42,122,74,0.1); color: var(--green); border: 1px solid rgba(42,122,74,0.2); }
+.key-pill.unset { background: rgba(181,58,42,0.08); color: var(--red); border: 1px solid rgba(181,58,42,0.18); }
+
+/* ─── LAYOUT ─── */
+.layout { display: grid; grid-template-columns: 356px 1fr; flex: 1; }
+.sidebar { background: var(--white); border-right: 1px solid var(--grey4); overflow-y: auto; padding: 1.25rem 1.5rem; height: calc(100vh - 54px); position: sticky; top: 54px; }
+.main { padding: 1.75rem 2rem; background: var(--bg); overflow-y: auto; }
+
+/* ─── SIDEBAR SECTIONS ─── */
+.s-section { margin-bottom: 1.5rem; }
+.s-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--grey2); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.s-label::after { content: ''; flex: 1; height: 1px; background: var(--grey4); }
+.step-num { width: 18px; height: 18px; border-radius: 50%; background: var(--orange); color: white; font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+/* ─── FORM ─── */
+label { font-size: 11px; font-weight: 500; color: var(--grey); display: block; margin-bottom: 4px; }
+input[type="text"], select, textarea { width: 100%; font-family: var(--font); font-size: 13px; color: var(--text); background: var(--white); border: 1px solid var(--grey3); border-radius: var(--r); padding: 7px 10px; outline: none; transition: border-color 0.15s, box-shadow 0.15s; appearance: none; -webkit-appearance: none; }
+input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-dim); }
+input[type="text"]::placeholder, textarea::placeholder { color: var(--grey2); }
+textarea { resize: vertical; min-height: 52px; line-height: 1.55; }
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235C5C5C'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
+.field { margin-bottom: 10px; }
+
+/* ─── REFERENCE UPLOAD GRID ─── */
+.ref-model-block { margin-bottom: 12px; }
+.ref-model-label { font-size: 11px; font-weight: 600; color: var(--brown); margin-bottom: 7px; display: flex; align-items: center; gap: 8px; }
+.ref-model-label .ref-count { font-size: 10px; font-weight: 400; color: var(--grey2); }
+.ref-photos-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-start; }
+.ref-thumb {
+  width: 56px; height: 56px; border-radius: var(--r); overflow: hidden;
+  border: 1.5px solid var(--orange); flex-shrink: 0; position: relative; cursor: pointer;
+}
+.ref-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ref-thumb-remove {
+  position: absolute; inset: 0; background: rgba(181,58,42,0.75);
+  display: none; align-items: center; justify-content: center;
+  font-size: 14px; color: white; cursor: pointer;
+}
+.ref-thumb:hover .ref-thumb-remove { display: flex; }
+.ref-add-btn {
+  width: 56px; height: 56px; border-radius: var(--r);
+  border: 1.5px dashed var(--grey3); background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s; gap: 2px; flex-shrink: 0;
+  position: relative; overflow: hidden;
+}
+.ref-add-btn:hover { border-color: var(--orange); background: var(--orange-dim); }
+.ref-add-btn input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.ref-add-icon { font-size: 16px; color: var(--grey2); line-height: 1; }
+.ref-add-text { font-size: 8px; color: var(--grey2); }
+.ref-setting-row { display: flex; gap: 6px; align-items: center; }
+.ref-setting-preview { width: 80px; height: 50px; border-radius: var(--r); overflow: hidden; border: 1.5px solid var(--orange); flex-shrink: 0; cursor: pointer; position: relative; }
+.ref-setting-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ref-setting-preview .ref-thumb-remove { display: none; }
+.ref-setting-preview:hover .ref-thumb-remove { display: flex; }
+.ref-setting-add { width: 80px; height: 50px; border-radius: var(--r); border: 1.5px dashed var(--grey3); background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; gap: 2px; position: relative; overflow: hidden; flex-shrink: 0; }
+.ref-setting-add:hover { border-color: var(--orange); background: var(--orange-dim); }
+.ref-setting-add input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.ref-notice { font-size: 10px; color: var(--grey2); line-height: 1.5; margin-top: 8px; padding: 7px 9px; background: var(--grey5); border-radius: var(--r); border: 1px solid var(--grey4); }
+
+/* ─── MODEL CARDS ─── */
+.model-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.model-card { border: 1.5px solid var(--grey3); border-radius: var(--r-lg); padding: 12px 10px; cursor: pointer; text-align: center; transition: all 0.18s; background: var(--white); position: relative; overflow: hidden; box-shadow: var(--sh); }
+.model-card:hover { border-color: var(--brown2); background: var(--brown-tint); }
+.model-card.active { border-color: var(--orange); background: var(--orange-tint); box-shadow: 0 0 0 3px var(--orange-dim), var(--sh); }
+.model-card.active::after { content: '✓'; position: absolute; top: 7px; right: 9px; font-size: 11px; font-weight: 700; color: var(--orange); }
+.model-thumb-wrap { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; margin: 0 auto 7px; border: 2px solid var(--grey4); background: var(--grey5); display: flex; align-items: center; justify-content: center; }
+.model-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.model-thumb-wrap .model-initial { font-size: 16px; font-weight: 600; color: var(--grey2); }
+.model-card.active .model-thumb-wrap { border-color: var(--orange); }
+.model-name { font-size: 13px; font-weight: 700; color: var(--brown); letter-spacing: 0.05em; text-transform: uppercase; }
+.model-desc { font-size: 10px; color: var(--grey); margin-top: 4px; line-height: 1.5; }
+.model-ref-tag { font-size: 9px; margin-top: 5px; padding: 2px 6px; border-radius: 10px; display: inline-block; }
+.model-ref-tag.ok      { background: rgba(42,122,74,0.1); color: var(--green); }
+.model-ref-tag.missing { background: var(--grey5); color: var(--grey2); }
+
+/* ─── PILLS ─── */
+.pill-grid { display: grid; gap: 6px; }
+.pill-grid.two   { grid-template-columns: 1fr 1fr; }
+.pill-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+.pill { border: 1.5px solid var(--grey3); border-radius: var(--r); padding: 7px 6px; cursor: pointer; text-align: center; font-size: 11px; font-weight: 500; color: var(--grey); transition: all 0.15s; background: var(--white); user-select: none; }
+.pill:hover  { border-color: var(--brown2); color: var(--brown); background: var(--brown-dim); }
+.pill.active { border-color: var(--orange); color: var(--orange); background: var(--orange-tint); font-weight: 600; }
+
+/* ─── GARMENT SLOTS ─── */
+.garment-list { display: flex; flex-direction: column; gap: 8px; }
+.garment-slot { background: var(--white); border: 1px solid var(--grey4); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--sh); }
+.garment-slot-header { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-bottom: 1px solid var(--grey4); background: var(--grey5); }
+.garment-slot-name { font-size: 12px; font-weight: 500; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.garment-thumb       { width: 28px; height: 28px; border-radius: 4px; object-fit: cover; border: 1px solid var(--grey4); flex-shrink: 0; }
+.garment-thumb-empty { width: 28px; height: 28px; border-radius: 4px; background: var(--grey4); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--grey2); flex-shrink: 0; }
+.garment-slot-body { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.garment-upload-zone { border: 1.5px dashed var(--grey3); border-radius: var(--r); padding: 12px; text-align: center; cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden; background: var(--bg); }
+.garment-upload-zone:hover { border-color: var(--orange); background: var(--orange-dim); }
+.garment-upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.garment-upload-zone.has-image { padding: 0; border-style: solid; border-color: var(--orange); }
+.garment-upload-preview { width: 100%; height: 80px; object-fit: contain; display: block; background: var(--bg); }
+.garment-upload-label { font-size: 11px; color: var(--grey2); }
+.remove-slot { font-size: 11px; font-weight: 500; color: var(--grey2); cursor: pointer; padding: 2px 6px; border-radius: 3px; transition: all 0.15s; }
+.remove-slot:hover { color: var(--red); background: rgba(181,58,42,0.08); }
+.add-garment-btn { width: 100%; padding: 9px; font-family: var(--font); font-size: 12px; font-weight: 500; background: transparent; color: var(--grey); border: 1.5px dashed var(--grey3); border-radius: var(--r); cursor: pointer; transition: all 0.15s; margin-top: 8px; }
+.add-garment-btn:hover { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
+
+hr { border: none; border-top: 1px solid var(--grey4); margin: 1.25rem 0; }
+
+/* ─── EDIT BANNER ─── */
+.edit-banner { background: var(--orange-tint); border: 1px solid rgba(207,90,32,0.25); border-radius: var(--r); padding: 9px 12px; margin-bottom: 12px; font-size: 11px; font-weight: 500; color: var(--orange); display: flex; align-items: center; justify-content: space-between; }
+.edit-banner.hidden { display: none !important; }
+.cancel-edit { font-size: 11px; color: var(--grey2); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.cancel-edit:hover { color: var(--text); }
+
+/* ─── GENERATE BUTTON ─── */
+.gen-btn { width: 100%; padding: 12px; font-family: var(--font); font-size: 13px; font-weight: 600; letter-spacing: 0.04em; background: var(--orange); color: white; border: 2px solid transparent; border-radius: var(--r); cursor: pointer; transition: all 0.15s; margin-top: 4px; box-shadow: 0 2px 8px rgba(207,90,32,0.28); }
+.gen-btn:hover    { background: var(--orange2); }
+.gen-btn:disabled { background: var(--grey3); color: var(--grey2); cursor: not-allowed; box-shadow: none; }
+.gen-btn.edit-mode { background: white; color: var(--orange); border-color: var(--orange); box-shadow: none; }
+.gen-btn.edit-mode:hover { background: var(--orange-tint); }
+
+/* ─── MAIN PANEL ─── */
+.result-area { margin-bottom: 2rem; }
+.result-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; }
+.result-title { font-size: 20px; font-weight: 600; color: var(--brown); letter-spacing: -0.01em; }
+.result-sub   { font-size: 11px; color: var(--grey2); }
+.current-image-wrap { position: relative; background: var(--white); border: 1px solid var(--grey4); border-radius: var(--r-lg); overflow: hidden; max-width: 480px; box-shadow: var(--sh-md); }
+.current-image-wrap img { width: 100%; display: block; cursor: zoom-in; }
+.current-image-placeholder { aspect-ratio: 4/5; max-width: 480px; background: var(--white); border: 1.5px dashed var(--grey3); border-radius: var(--r-lg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+.placeholder-icon { font-size: 32px; color: var(--grey3); }
+.placeholder-text { font-size: 13px; font-weight: 500; color: var(--grey); }
+.placeholder-sub  { font-size: 11px; color: var(--grey2); text-align: center; max-width: 200px; line-height: 1.5; }
+.image-actions { display: flex; gap: 8px; margin-top: 10px; max-width: 480px; }
+.action-btn { flex: 1; padding: 9px 8px; font-family: var(--font); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; border-radius: var(--r); transition: all 0.15s; border: 1.5px solid var(--grey3); background: var(--white); color: var(--grey); }
+.action-btn:hover  { border-color: var(--brown2); color: var(--brown); background: var(--brown-dim); }
+.action-btn.primary { background: var(--brown-dim); border-color: var(--brown); color: var(--brown); }
+.action-btn.primary:hover { background: var(--brown); color: white; }
+.generating-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.gen-spinner { width: 28px; height: 28px; border: 2.5px solid var(--grey4); border-top-color: var(--orange); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.gen-label { font-size: 11px; font-weight: 600; color: var(--orange); letter-spacing: 0.08em; text-transform: uppercase; }
+.prompt-reveal { max-width: 480px; margin-top: 8px; }
+.prompt-toggle { font-size: 11px; color: var(--grey2); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.prompt-toggle:hover { color: var(--orange); }
+.prompt-box { font-size: 11px; font-family: var(--mono); color: var(--grey); background: var(--white); border: 1px solid var(--grey4); border-radius: var(--r); padding: 10px 12px; margin-top: 6px; line-height: 1.7; display: none; max-height: 160px; overflow-y: auto; }
+
+/* ─── HISTORY ─── */
+.history-section { border-top: 1px solid var(--grey4); padding-top: 1.5rem; }
+.history-header  { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1rem; }
+.history-title   { font-size: 17px; font-weight: 600; color: var(--brown); }
+.history-count   { font-size: 11px; color: var(--grey2); }
+.history-grid    { display: grid; grid-template-columns: repeat(auto-fill, minmax(156px, 1fr)); gap: 12px; }
+.history-card { background: var(--white); border: 1px solid var(--grey4); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--sh); transition: all 0.2s; cursor: pointer; }
+.history-card:hover { border-color: var(--brown2); box-shadow: var(--sh-md); transform: translateY(-2px); }
+.history-card img { width: 100%; aspect-ratio: 4/5; object-fit: cover; display: block; }
+.history-card-footer { padding: 8px 10px; }
+.history-card-meta { font-size: 10px; color: var(--grey); line-height: 1.5; }
+.history-card-actions { display: flex; gap: 5px; margin-top: 6px; }
+.h-btn { flex: 1; padding: 5px; font-size: 10px; font-weight: 500; text-transform: uppercase; cursor: pointer; border-radius: 4px; border: 1px solid var(--grey3); background: transparent; color: var(--grey); font-family: var(--font); transition: all 0.15s; }
+.h-btn:hover      { border-color: var(--brown); color: var(--brown); background: var(--brown-dim); }
+.h-btn.edit       { border-color: var(--orange); color: var(--orange); background: var(--orange-tint); }
+.h-btn.edit:hover { background: var(--orange); color: white; border-color: var(--orange); }
+
+/* ─── GARMENT MULTI-IMAGE ─── */
+.garment-images-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+.garment-img-thumb { width: 48px; height: 48px; border-radius: var(--r); overflow: hidden; border: 1.5px solid var(--orange); flex-shrink: 0; position: relative; cursor: pointer; }
+.garment-img-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.garment-img-remove { position: absolute; inset: 0; background: rgba(181,58,42,0.75); display: none; align-items: center; justify-content: center; font-size: 12px; color: white; cursor: pointer; }
+.garment-img-thumb:hover .garment-img-remove { display: flex; }
+.garment-img-add { width: 48px; height: 48px; border-radius: var(--r); border: 1.5px dashed var(--grey3); background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; gap: 1px; flex-shrink: 0; position: relative; overflow: hidden; }
+.garment-img-add:hover { border-color: var(--orange); background: var(--orange-dim); }
+.garment-img-add input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.garment-img-add-icon { font-size: 14px; color: var(--grey2); }
+.garment-img-add-text { font-size: 8px; color: var(--grey2); }
+
+/* ─── EDIT PANEL ─── */
+.edit-panel { display: none; background: var(--orange-tint); border: 1px solid rgba(207,90,32,0.25); border-radius: var(--r); padding: 12px; margin-bottom: 12px; }
+.edit-panel.visible { display: block; }
+.edit-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.edit-panel-title { font-size: 11px; font-weight: 600; color: var(--orange); }
+.edit-panel textarea { font-size: 12px; min-height: 70px; background: var(--white); border-color: rgba(207,90,32,0.3); }
+.edit-panel textarea:focus { border-color: var(--orange); }
+.edit-panel-hint { font-size: 10px; color: var(--grey2); margin-top: 5px; line-height: 1.5; }
+
+/* ─── LIGHTBOX ─── */
+.lightbox { position: fixed; inset: 0; background: rgba(15,10,6,0.92); z-index: 1000; display: none; align-items: center; justify-content: center; }
+.lightbox.open { display: flex; }
+.lightbox-img-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
+.lightbox img { max-width: 80vw; max-height: 88vh; object-fit: contain; border-radius: var(--r-lg); box-shadow: 0 24px 80px rgba(0,0,0,0.5); cursor: default; display: block; }
+.lightbox-close { position: absolute; top: 1.5rem; right: 1.5rem; font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.35); letter-spacing: 0.1em; cursor: pointer; z-index: 2; }
+.lightbox-close:hover { color: white; }
+.lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; color: rgba(255,255,255,0.6); transition: all 0.15s; user-select: none; z-index: 2; }
+.lightbox-nav:hover { background: rgba(255,255,255,0.2); color: white; }
+.lightbox-nav.prev { left: -60px; }
+.lightbox-nav.next { right: -60px; }
+.lightbox-counter { position: absolute; bottom: -2rem; left: 50%; transform: translateX(-50%); font-size: 11px; color: rgba(255,255,255,0.35); white-space: nowrap; }
+
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--grey3); border-radius: 2px; }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .sidebar { position: static; height: auto; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><div class="brand-dot"></div>EDITORIAL <em>STUDIO</em></div>
+  <div class="key-area">
+    <input type="password" class="key-input" id="api-key" placeholder="Google AI Studio key — AIzaSy..." oninput="updateKey()" autocomplete="off" />
+    <span class="key-pill unset" id="key-pill">No key</span>
+  </div>
+</header>
+
+<div class="layout">
+<aside class="sidebar">
+
+
+  <!-- STEP 1: REFERENCES -->
+  <div class="s-section">
+    <div class="s-label"><span class="step-num">1</span>Reference images</div>
+
+    <div class="ref-model-block">
+      <div class="ref-model-label">Yuri <span class="ref-count" id="yuri-ref-count">0 photos</span></div>
+      <div class="ref-photos-row" id="yuri-ref-row">
+        <div class="ref-add-btn">
+          <input type="file" accept="image/*" multiple onchange="handleRefUpload(event,'yuri')" onclick="event.stopPropagation()" />
+          <div class="ref-add-icon">＋</div>
+          <div class="ref-add-text">Add</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-model-block">
+      <div class="ref-model-label">Amadou <span class="ref-count" id="amadou-ref-count">0 photos</span></div>
+      <div class="ref-photos-row" id="amadou-ref-row">
+        <div class="ref-add-btn">
+          <input type="file" accept="image/*" multiple onchange="handleRefUpload(event,'amadou')" onclick="event.stopPropagation()" />
+          <div class="ref-add-icon">＋</div>
+          <div class="ref-add-text">Add</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-model-block">
+      <div class="ref-model-label">Setting</div>
+      <div class="ref-photos-row" id="setting-ref-row">
+        <div class="ref-add-btn">
+          <input type="file" accept="image/*" onchange="handleRefUpload(event,'setting')" onclick="event.stopPropagation()" />
+          <div class="ref-add-icon">＋</div>
+          <div class="ref-add-text">Add</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-notice">Upload multiple angles per model — front, back, side, headshot. All are sent automatically with every generation.</div>
+  </div>
+
+  <!-- STEP 2: MODEL -->
+  <div class="s-section">
+    <div class="s-label"><span class="step-num">2</span>Model</div>
+    <div class="model-grid">
+      <div class="model-card active" data-model="YURI" onclick="selectModel(this)">
+        <div class="model-thumb-wrap" id="model-thumb-YURI"><span class="model-initial">Y</span></div>
+        <div class="model-name">Yuri</div>
+        <div class="model-desc">Silver hair · Grey beard<br>Athletic · Intense</div>
+        <div class="model-ref-tag missing" id="model-tag-YURI">No ref photo</div>
+      </div>
+      <div class="model-card" data-model="AMADOU" onclick="selectModel(this)">
+        <div class="model-thumb-wrap" id="model-thumb-AMADOU"><span class="model-initial">A</span></div>
+        <div class="model-name">Amadou</div>
+        <div class="model-desc">Close-cropped · Lean<br>Relaxed · Understated</div>
+        <div class="model-ref-tag missing" id="model-tag-AMADOU">No ref photo</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: SHOT TYPE -->
+  <div class="s-section">
+    <div class="s-label"><span class="step-num">3</span>Shot type</div>
+    <div class="pill-grid two" id="shot-type-grid">
+      <div class="pill active" data-val="full-body"     onclick="selectPill(this,'shot-type-grid')">Full body</div>
+      <div class="pill"        data-val="medium-top"    onclick="selectPill(this,'shot-type-grid')">Medium — top</div>
+      <div class="pill"        data-val="medium-bottom" onclick="selectPill(this,'shot-type-grid')">Medium — bottom</div>
+      <div class="pill"        data-val="close-up"      onclick="selectPill(this,'shot-type-grid')">Close up</div>
+    </div>
+  </div>
+
+  <!-- STEP 4: ORIENTATION -->
+  <div class="s-section">
+    <div class="s-label"><span class="step-num">4</span>Orientation</div>
+    <div class="pill-grid two" id="orient-grid">
+      <div class="pill active" data-val="head-on"       onclick="selectPill(this,'orient-grid')">Head-on</div>
+      <div class="pill"        data-val="three-quarter" onclick="selectPill(this,'orient-grid')">¾ profile</div>
+      <div class="pill"        data-val="full-profile"  onclick="selectPill(this,'orient-grid')">Full profile</div>
+      <div class="pill"        data-val="back-view"     onclick="selectPill(this,'orient-grid')">Back view</div>
+    </div>
+  </div>
+
+  <!-- GAZE -->
+  <div class="s-section">
+    <div class="s-label">Gaze</div>
+    <div class="pill-grid three" id="gaze-grid">
+      <div class="pill active" data-val="at-camera"  onclick="selectPill(this,'gaze-grid')">At camera</div>
+      <div class="pill"        data-val="down"        onclick="selectPill(this,'gaze-grid')">Down</div>
+      <div class="pill"        data-val="off-frame"   onclick="selectPill(this,'gaze-grid')">Off frame</div>
+    </div>
+  </div>
+
+  <!-- RESOLUTION -->
+  <div class="s-section">
+    <div class="s-label">Resolution</div>
+    <div class="pill-grid two" id="res-grid">
+      <div class="pill active" data-val="1k" onclick="selectPill(this,'res-grid')">1K — test</div>
+      <div class="pill"        data-val="4k" onclick="selectPill(this,'res-grid')">4K — final</div>
+    </div>
+  </div>
+
+  <hr />
+
+  <!-- GARMENTS -->
+  <div class="s-section">
+    <div class="s-label"><span class="step-num">5</span>Garments</div>
+    <div class="garment-list" id="garment-list"></div>
+    <button class="add-garment-btn" onclick="addGarmentSlot()">+ Add garment</button>
+  </div>
+
+  <!-- LAYERING -->
+  <div class="s-section">
+    <div class="s-label">Layering &amp; fit notes</div>
+    <div class="field">
+      <textarea id="layering" placeholder="How pieces are worn together, fit, tucking, layering order, proportions..." rows="3"></textarea>
+    </div>
+  </div>
+
+  <!-- ADDITIONAL DIRECTION -->
+  <div class="s-section">
+    <div class="s-label">Additional direction</div>
+    <div class="field">
+      <textarea id="extra-direction" placeholder="Pose, hands, weight, anything specific for this shot..." rows="2"></textarea>
+    </div>
+  </div>
+
+  <button class="gen-btn" id="gen-btn" onclick="generate()">Generate image</button>
+
+</aside>
+
+<main class="main">
+  <div class="result-area">
+    <div class="result-top">
+      <div class="result-title">Current image</div>
+      <div class="result-sub" id="result-sub">Upload references, configure, and generate</div>
+    </div>
+    <div id="current-wrap">
+      <div class="current-image-placeholder">
+        <div class="placeholder-icon">◻</div>
+        <div class="placeholder-text">No image yet</div>
+        <div class="placeholder-sub">Upload model + setting references, then generate</div>
+      </div>
+    </div>
+    <div class="image-actions" id="image-actions" style="display:none;">
+      <button class="action-btn primary" id="edit-toggle-btn" onclick="toggleEditPanel()">✦ Edit this image</button>
+      <button class="action-btn" onclick="downloadCurrent()">↓ Download</button>
+      <button class="action-btn" onclick="newImage()">+ New image</button>
+    </div>
+    <div class="edit-panel" id="edit-panel" style="max-width:480px;margin-top:8px;">
+      <div class="edit-panel-header">
+        <div class="edit-panel-title">✦ Edit notes</div>
+        <span class="cancel-edit" onclick="toggleEditPanel()">Close</span>
+      </div>
+      <textarea id="edit-notes" placeholder="Describe only what you want to change — e.g. 'turn his head slightly to the left' or 'make the jacket darker'. Everything else stays exactly the same."></textarea>
+      <div class="edit-panel-hint">Only what you describe here will change. The model, garments, setting, lighting, and framing are all preserved exactly.</div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="gen-btn edit-mode" style="margin-top:0;" onclick="applyEdit()">Apply edit</button>
+      </div>
+    </div>
+    <div class="prompt-reveal" id="prompt-reveal" style="display:none;">
+      <span class="prompt-toggle" onclick="togglePrompt()">Show prompt</span>
+      <div class="prompt-box" id="prompt-box"></div>
+    </div>
+  </div>
+
+  <div class="history-section">
+    <div class="history-header">
+      <div class="history-title">History</div>
+      <div class="history-count" id="history-count">0 images</div>
+    </div>
+    <div class="history-grid" id="history-grid">
+      <div style="font-size:12px;color:var(--grey2);grid-column:1/-1;">Generated images will appear here.</div>
+    </div>
+  </div>
+</main>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-close" onclick="closeLightbox()">ESC TO CLOSE</div>
+  <div class="lightbox-img-wrap">
+    <div class="lightbox-nav prev" onclick="lightboxNav(-1)">‹</div>
+    <img id="lightbox-img" src="" alt="" />
+    <div class="lightbox-nav next" onclick="lightboxNav(1)">›</div>
+    <div class="lightbox-counter" id="lightbox-counter"></div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let currentImageData = null;
+let currentMime = 'image/png';
+let currentPrompt = '';
+let currentPoseVariation = null;
+let editingHistoryId = null;
+let history = [];
+let garmentSlots = [];
+let slotCounter = 0;
+
+const refs = { yuri: [], amadou: [], setting: [] };
+
+// ── LOCALSTORAGE PERSISTENCE ──
+const LS_KEY = 'editorial-studio-v5';
+
+function saveToStorage() {
+  try {
+    const data = {
+      apiKey: document.getElementById('api-key')?.value || '',
+      refs: {
+        yuri: refs.yuri.map(r => ({ base64: r.base64, mime: r.mime, url: r.url, id: r.id })),
+        amadou: refs.amadou.map(r => ({ base64: r.base64, mime: r.mime, url: r.url, id: r.id })),
+        setting: refs.setting.map(r => ({ base64: r.base64, mime: r.mime, url: r.url, id: r.id }))
+      }
+    };
+    localStorage.setItem(LS_KEY, JSON.stringify(data));
+  } catch(e) { console.warn('Storage save failed:', e); }
+}
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    // Restore API key
+    if (data.apiKey) {
+      const keyInput = document.getElementById('api-key');
+      if (keyInput) { keyInput.value = data.apiKey; updateKey(); }
+    }
+    // Restore refs
+    ['yuri', 'amadou', 'setting'].forEach(key => {
+      if (data.refs?.[key]?.length) {
+        data.refs[key].forEach(r => {
+          refs[key].push(r);
+        });
+        renderRefRow(key);
+        // Update model card thumbs
+        if ((key === 'yuri' || key === 'amadou') && refs[key].length > 0) {
+          const modelKey = key.toUpperCase();
+          const thumb = document.getElementById('model-thumb-' + modelKey);
+          if (thumb) thumb.innerHTML = '<img src="' + refs[key][0].url + '" />';
+          const tag = document.getElementById('model-tag-' + modelKey);
+          if (tag) { tag.textContent = refs[key].length + ' ref photo' + (refs[key].length > 1 ? 's' : '') + ' ✓'; tag.className = 'model-ref-tag ok'; }
+        }
+      }
+    });
+  } catch(e) { console.warn('Storage load failed:', e); }
+}
+
+// ── POSE VARIATION POOLS ──
+// Each gaze direction has many possible poses so no two shots look the same
+const POSE_VARIATIONS = {
+  YURI: {
+    'at-camera': [
+      'Standing with weight on left leg, right foot slightly forward, right hand loosely in trouser pocket, left arm hanging naturally. Jaw set, direct gaze, subtle tension in the brow.',
+      'Both hands in pockets, shoulders relaxed but not slumped, slight lean back against nothing — just weight settled. Eyes level, unflinching.',
+      'Left hand gripping right wrist loosely in front of the body, elbows soft. Weight distributed evenly. Chin very slightly lowered, gaze piercing upward from under the brow.',
+      'Arms loose at sides, one thumb hooked in pocket, the other hanging free. Torso very slightly angled. Intense, still expression — like he\'s seen everything.',
+      'Weight on right leg, left hand resting flat against outer thigh, right arm loosely crossed over stomach. Quiet intensity.',
+    ],
+    'down': [
+      'Looking down and to the left, as if something on the floor caught his attention. One hand in pocket, the other hanging. Contemplative, closed expression.',
+      'Head tilted forward, gaze cast directly downward. Arms loosely crossed low on the stomach. The posture of someone lost in thought.',
+      'Chin dropped, eyes down, weight shifted to one hip. One hand loosely in jacket pocket. Meditative stillness.',
+      'Looking down at an angle, as if reading something low on the wall. One arm hanging, the other hand resting on his own forearm.',
+    ],
+    'off-frame': [
+      'Gaze directed to the left and past the camera, as if watching something in the distance. Jaw slightly set. One hand in pocket.',
+      'Looking right, eyes tracking something beyond the frame. Slight turn of the chin. Relaxed but watchful.',
+      'Eyes cast upward and to the right, as if recalling something. Arms loose. Expression somewhere between memory and restraint.',
+      'Looking just past the right edge of frame, eyes narrow slightly. Weight on back foot. The posture of a man who doesn\'t explain himself.',
+    ],
+  },
+  AMADOU: {
+    'at-camera': [
+      'Standing with arms loosely at sides, one wrist slightly bent, fingers relaxed. Weight on left leg. Expression neutral, present, unbothered.',
+      'Right hand hanging, left hand loosely holding the hem of the jacket from below. Eyes level, expression calm and distant.',
+      'Both arms hanging naturally, body completely at ease. Lips together, expression quiet. As if he forgot the camera was there.',
+      'Chin slightly raised, not arrogant — just at rest. Arms loose, one thumb barely hooked in a pocket. A stillness that reads as self-possession.',
+    ],
+    'down': [
+      'Head bowed slightly, eyes tracing the floor. Arms down and relaxed. The pose of someone comfortable in silence.',
+      'Looking downward to the right, expression soft and inward. One arm hanging, the other hand resting loosely across his stomach.',
+      'Chin dropped, eyes cast down. Weight settled naturally on both feet. Completely still, like the room is his.',
+      'Eyes down, head tilted very slightly forward. One hand in pocket, the other relaxed at side. Effortless, unperformed.',
+    ],
+    'off-frame': [
+      'Looking left, just past the edge of frame. Expression neutral, gaze unhurried. Arms loose at sides.',
+      'Eyes directed to the right and slightly upward, as if listening for something. Body still, expression open.',
+      'Gaze drifting past camera to the left — not distracted, just elsewhere. Weight shifted to one hip naturally.',
+      'Looking just above and past the camera, expression soft. Arms hanging. Completely at ease.',
+    ],
+  }
+};
+
+const MODEL_DATA = {
+  YURI: {
+    desc: `Male model, approximately 55-60 years old. Tall, broad-shouldered, athletic build for his age. Silver-grey hair slicked back cleanly behind the ears. Well-groomed short grey beard. Sharp angular face with deep-set eyes, strong prominent jaw, weathered but distinguished skin. High cheekbones. Intense, composed expression. He is the SAME person shown in the Yuri reference photo provided.`,
+  },
+  AMADOU: {
+    desc: `Male model, approximately 25-30 years old. Lean, very tall build with long limbs and elegant proportions. Very dark, deep ebony skin. Close-cropped natural hair. Angular face with sharp cheekbones, long neck. Quietly confident, understated presence. He is the SAME person shown in the Amadou reference photo provided.`,
+  }
+};
+
+const SHOT_DATA = {
+  'full-body': {
+    lens: '50mm lens', distance: 'camera at 10 feet from subject, camera at standing eye level (approximately 5.5 feet off ground)',
+    framing: 'Full body shot — the subject is completely visible head to toe, centred in frame. Both the carpet floor beneath their feet AND the wood panel wall behind them are visible. Camera is at eye level, perpendicular to the wall. The subject fills roughly 80% of the frame height.',
+    camera: 'camera at eye level, perpendicular to the wall',
+    visibleZones: ['head', 'upper body', 'lower body', 'feet']
+  },
+  'medium-top': {
+    lens: '24mm lens', distance: 'camera moved close — approximately 3 feet from the subject, camera height raised to chest level (approximately 4 feet off ground)',
+    framing: 'Medium shot — frame from approximately mid-thigh upward. NO floor visible whatsoever. The wood panel wall fills the ENTIRE background from edge to edge and top to bottom. The wall panels appear large and close. Camera is at chest height looking very slightly upward. The subject fills the full height of the frame from thighs to top of head.',
+    camera: 'camera at chest height, very slightly below eyeline, perpendicular to the wall',
+    visibleZones: ['head', 'upper body', 'mid-thigh up']
+  },
+  'medium-bottom': {
+    lens: '24mm lens', distance: 'camera moved close — approximately 3 feet from the subject, camera lowered to waist level (approximately 2.5 feet off ground)',
+    framing: 'Medium-low shot — frame from approximately waist downward to feet. NO face or shoulders visible. The carpet floor is visible at the bottom of frame. The lower portion of the wood panel wall fills the upper background. Camera is at waist height looking slightly upward.',
+    camera: 'camera at waist height looking slightly upward, perpendicular to the wall',
+    visibleZones: ['waist down', 'legs', 'feet', 'shoes']
+  },
+  'close-up': {
+    lens: '85mm lens', distance: 'camera approximately 4 feet from the subject, camera at chest height',
+    framing: 'Close-up shot — frame from chest upward, including shoulders and full head. NO floor visible. NO lower body visible below chest. The wood panel wall fills the entire background. Camera is at chest height. Face and upper torso fill most of the frame.',
+    camera: 'camera at chest height, perpendicular to the wall',
+    visibleZones: ['chest up', 'head', 'shoulders', 'upper chest']
+  }
+};
+
+// Which garment categories are visible per shot
+const SHOT_VISIBLE = {
+  'full-body':     ['outerwear','jacket','coat','top','shirt','knitwear','sweater','trouser','pant','jean','short','shoe','boot','sneaker','accessory','belt','scarf','bag'],
+  'medium-top':    ['outerwear','jacket','coat','top','shirt','knitwear','sweater','accessory','scarf','belt'],
+  'medium-bottom': ['trouser','pant','jean','short','shoe','boot','sneaker','belt','accessory'],
+  'close-up':      ['outerwear','jacket','coat','top','shirt','knitwear','sweater','accessory','scarf']
+};
+
+const ORIENT_DATA = {
+  'head-on':       'model facing directly toward camera, square front view',
+  'three-quarter': 'model body turned approximately 45 degrees from camera, face angled back toward lens',
+  'full-profile':  'model in true side profile, body perpendicular to camera',
+  'back-view':     'model facing away from camera, back view'
+};
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// ── KEY ──
+function updateKey() {
+  const v = document.getElementById('api-key').value.trim();
+  const pill = document.getElementById('key-pill');
+  const ok = v.length > 15;
+  pill.textContent = ok ? 'Key set ✓' : 'No key';
+  pill.className = 'key-pill ' + (ok ? 'set' : 'unset');
+  saveToStorage();
+}
+
+// ── REFERENCE UPLOADS ──
+function handleRefUpload(e, key) {
+  const files = Array.from(e.target.files); if (!files.length) return;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const dataUrl = ev.target.result;
+      const refObj = { base64: dataUrl.split(',')[1], mime: file.type, url: dataUrl, id: Date.now() + Math.random() };
+      refs[key].push(refObj);
+      renderRefRow(key);
+      // Update model card thumb with first photo
+      if ((key === 'yuri' || key === 'amadou') && refs[key].length === 1) {
+        const modelKey = key.toUpperCase();
+        const thumb = document.getElementById('model-thumb-' + modelKey);
+        if (thumb) thumb.innerHTML = `<img src="${dataUrl}" />`;
+        const tag = document.getElementById('model-tag-' + modelKey);
+        if (tag) { tag.textContent = refs[key].length + ' ref photo' + (refs[key].length > 1 ? 's' : '') + ' ✓'; tag.className = 'model-ref-tag ok'; }
+      } else if ((key === 'yuri' || key === 'amadou')) {
+        const tag = document.getElementById('model-tag-' + key.toUpperCase());
+        if (tag) { tag.textContent = refs[key].length + ' ref photos ✓'; tag.className = 'model-ref-tag ok'; }
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+}
+
+function removeRef(key, id) {
+  refs[key] = refs[key].filter(r => r.id !== id);
+  renderRefRow(key);
+  if (key === 'yuri' || key === 'amadou') {
+    const modelKey = key.toUpperCase();
+    const thumb = document.getElementById('model-thumb-' + modelKey);
+    const tag = document.getElementById('model-tag-' + modelKey);
+    if (refs[key].length === 0) {
+      if (thumb) thumb.innerHTML = `<span class="model-initial">${modelKey[0]}</span>`;
+      if (tag) { tag.textContent = 'No ref photo'; tag.className = 'model-ref-tag missing'; }
+    } else {
+      if (thumb) thumb.innerHTML = `<img src="${refs[key][0].url}" />`;
+      if (tag) { tag.textContent = refs[key].length + ' ref photo' + (refs[key].length > 1 ? 's' : '') + ' ✓'; tag.className = 'model-ref-tag ok'; }
+    }
+  }
+}
+
+function renderRefRow(key) {
+  const row = document.getElementById(key + '-ref-row'); if (!row) return;
+  const countEl = document.getElementById(key + '-ref-count');
+  if (countEl) countEl.textContent = refs[key].length + ' photo' + (refs[key].length !== 1 ? 's' : '');
+  const thumbsHtml = refs[key].map(r => `
+    <div class="ref-thumb">
+      <img src="${r.url}" />
+      <div class="ref-thumb-remove" onclick="removeRef('${key}', ${r.id})">✕</div>
+    </div>`).join('');
+  const addHtml = `<div class="ref-add-btn"><input type="file" accept="image/*" multiple onchange="handleRefUpload(event,'${key}')" onclick="event.stopPropagation()" /><div class="ref-add-icon">＋</div><div class="ref-add-text">Add</div></div>`;
+  row.innerHTML = thumbsHtml + addHtml;
+  saveToStorage();
+}
+
+// ── MODEL SELECT ──
+function selectModel(el) {
+  document.querySelectorAll('.model-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+function getModel() { return document.querySelector('.model-card.active')?.dataset.model || 'YURI'; }
+
+// ── PILL SELECT ──
+function selectPill(el, gridId) {
+  document.querySelectorAll(`#${gridId} .pill`).forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+}
+function getPill(gridId) { return document.querySelector(`#${gridId} .pill.active`)?.dataset.val; }
+
+// ── GARMENT SLOTS ──
+function addGarmentSlot(data) {
+  slotCounter++;
+  const id = slotCounter;
+  garmentSlots.push({ id, imageBase64: data?.imageBase64||null, imageMime: data?.imageMime||null, imageUrl: data?.imageUrl||null, name: data?.name||'', desc: data?.desc||'', fit: data?.fit||'' });
+  renderGarmentSlots();
+}
+
+function removeGarmentSlot(id) {
+  garmentSlots = garmentSlots.filter(s => s.id !== id);
+  renderGarmentSlots();
+}
+
+function renderGarmentSlots() {
+  const list = document.getElementById('garment-list');
+  list.innerHTML = '';
+  garmentSlots.forEach(slot => {
+    const div = document.createElement('div');
+    div.className = 'garment-slot';
+    const thumbHtml = slot.images && slot.images.length > 0
+      ? `<img class="garment-thumb" src="${slot.images[0].url}" />`
+      : `<div class="garment-thumb-empty">＋</div>`;
+    const imagesHtml = (slot.images || []).map(img => `
+      <div class="garment-img-thumb">
+        <img src="${img.url}" />
+        <div class="garment-img-remove" onclick="removeGarmentImage(${slot.id},${img.id})">✕</div>
+      </div>`).join('');
+    div.innerHTML = `
+      <div class="garment-slot-header">
+        <div class="garment-slot-name">${thumbHtml}<span>${slot.name || 'Garment ' + slot.id}</span></div>
+        <span class="remove-slot" onclick="removeGarmentSlot(${slot.id})">✕</span>
+      </div>
+      <div class="garment-slot-body">
+        <label>PDP images (upload multiple angles)</label>
+        <div class="garment-images-row" id="gimages-${slot.id}">
+          ${imagesHtml}
+          <div class="garment-img-add">
+            <input type="file" accept="image/*" multiple onchange="handleSlotUpload(event,${slot.id})" onclick="event.stopPropagation()" />
+            <div class="garment-img-add-icon">＋</div>
+            <div class="garment-img-add-text">Add</div>
+          </div>
+        </div>
+        <div><label>Garment name / type</label><input type="text" value="${slot.name}" placeholder="e.g. Leather jacket, Wool trousers..." oninput="updateSlot(${slot.id},'name',this.value)" /></div>
+        <div><label>Description</label><textarea placeholder="Colour, material, key details, hardware, stitching..." oninput="updateSlot(${slot.id},'desc',this.value)">${slot.desc}</textarea></div>
+        <div><label>Fit notes</label><input type="text" value="${slot.fit}" placeholder="e.g. relaxed through chest, slightly cropped, wide leg..." oninput="updateSlot(${slot.id},'fit',this.value)" /></div>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function handleSlotUpload(e, id) {
+  const files = Array.from(e.target.files); if (!files.length) return;
+  const slot = garmentSlots.find(s => s.id === id); if (!slot) return;
+  if (!slot.images) slot.images = [];
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const dataUrl = ev.target.result;
+      slot.images.push({ id: Date.now() + Math.random(), url: dataUrl, base64: dataUrl.split(',')[1], mime: file.type });
+      if (!slot.name) slot.name = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g,' ');
+      renderGarmentSlots();
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value = '';
+}
+
+function removeGarmentImage(slotId, imgId) {
+  const slot = garmentSlots.find(s => s.id === slotId); if (!slot) return;
+  slot.images = (slot.images || []).filter(i => i.id !== imgId);
+  renderGarmentSlots();
+}
+
+function updateSlot(id, field, val) { const s = garmentSlots.find(s => s.id === id); if (s) s[field] = val; }
+
+// ── PROMPT BUILDER ──
+// poseVariationOverride: if set, use this pose instead of picking randomly (for edits)
+function buildPrompt(editNote, poseVariationOverride) {
+  const modelKey = getModel();
+  const model = MODEL_DATA[modelKey];
+  const shotKey = getPill('shot-type-grid') || 'full-body';
+  const shot = SHOT_DATA[shotKey];
+  const orient = ORIENT_DATA[getPill('orient-grid') || 'head-on'];
+  const gazeKey = getPill('gaze-grid') || 'at-camera';
+  const layering = document.getElementById('layering').value.trim();
+  const extra = document.getElementById('extra-direction').value.trim();
+
+  // Use override for edits (locks pose), pick fresh for new generations
+  const posePool = POSE_VARIATIONS[modelKey]?.[gazeKey] || POSE_VARIATIONS[modelKey]?.['at-camera'];
+  const poseVariation = poseVariationOverride || currentPoseVariation || pick(posePool);
+
+  const gazeDesc = gazeKey === 'at-camera' ? 'looking directly at the camera'
+    : gazeKey === 'down' ? 'gaze directed downward'
+    : 'looking off frame, away from camera';
+
+  // Shot-aware garment filtering
+  const visibleKeywords = SHOT_VISIBLE[shotKey] || SHOT_VISIBLE['full-body'];
+  const visibleSlots = garmentSlots.filter(slot => {
+    if (!slot.name) return true;
+    const n = slot.name.toLowerCase();
+    return visibleKeywords.some(k => n.includes(k));
+  });
+  const hiddenSlots = garmentSlots.filter(s => !visibleSlots.includes(s));
+
+  const garmentDesc = visibleSlots.length > 0
+    ? visibleSlots.map(s => {
+        let d = s.name || 'garment';
+        if (s.desc) d += ': ' + s.desc;
+        if (s.fit) d += ' (fit: ' + s.fit + ')';
+        return d;
+      }).join('\n  -- ')
+    : 'Clothing to be determined from uploaded reference images.';
+
+  const hiddenNote = hiddenSlots.length > 0
+    ? '\nNOT VISIBLE IN THIS SHOT (outside camera frame -- do not render): ' + hiddenSlots.map(s => s.name).join(', ')
+    : '';
+
+  const hasGarmentImages = garmentSlots.some(s => s.images && s.images.length > 0);
+  const hasModelRef = refs[modelKey.toLowerCase()]?.length > 0;
+  const hasSettingRef = refs.setting?.length > 0;
+
+  // Edit mode: strong instruction to change ONLY what's noted
+  const editSection = editNote
+    ? '\n\nEDIT MODE -- CRITICAL RULES:\nThe last image provided is the SOURCE IMAGE to edit. Apply ONLY this specific change: "' + editNote + '"\nEverything else in the source image must be reproduced exactly as it appears -- same model face and hair, same garments and their exact colours and construction, same camera angle and framing, same pose and body position (unless the edit note specifies otherwise), same lighting, same setting. Do not reinterpret anything not mentioned in the edit note. This is a surgical edit, not a new generation.'
+    : '';
+
+  // Shot framing hard constraints
+  const shotConstraints = {
+    'full-body': 'HARD CONSTRAINT: This is a FULL BODY shot. The ENTIRE figure must be visible from top of head to feet. Both the carpet floor and the wood wall must be visible. Do NOT crop at the waist or thighs.',
+    'medium-top': 'HARD CONSTRAINT: This is a MEDIUM SHOT of the upper body only. Frame from mid-thigh upward. The FLOOR MUST NOT BE VISIBLE. The wood panel wall fills the ENTIRE background. Do NOT show a full body shot. Do NOT include feet or lower legs. Crop tightly at mid-thigh.',
+    'medium-bottom': 'HARD CONSTRAINT: This is a MEDIUM SHOT of the lower body only. Frame from waist downward. Show legs and feet on the carpet floor. Do NOT show the face or upper chest.',
+    'close-up': 'HARD CONSTRAINT: This is a CLOSE-UP shot. Frame from chest upward only -- shoulders, neck, and head fill the frame. The FLOOR MUST NOT BE VISIBLE. Do NOT show a full body shot. Do NOT show anything below the chest.'
+  };
+
+  const prompt = 'Editorial menswear fashion photography. Hyper-realistic medium format digital photograph. Luxury commercial imagery.\n\n'
+    + 'MODEL IDENTITY: ' + model.desc + '\n'
+    + (hasModelRef ? 'CRITICAL: Reference photos of ' + (modelKey === 'YURI' ? 'Yuri' : 'Amadou') + ' are provided. Reproduce this EXACT person -- same face structure, same hair, same skin tone, same age, same distinctive features. Do not invent a different face.\n' : '')
+    + '\nPOSE & BODY LANGUAGE: ' + poseVariation
+    + '\nGAZE: ' + gazeDesc + '.'
+    + '\nORIENTATION: ' + orient + '.'
+    + '\n\nSETTING: ' + (hasSettingRef ? 'The exact setting is shown in the reference photo. Reproduce it precisely.' : 'Dark walnut wood panel wall -- large rectangular panels in a 2x2 grid with thin gaps. Muted taupe/brown carpet floor. Intimate, dark, luxurious.')
+    + '\n\nLIGHTING: Light falls from directly above and slightly in front of the subject -- tight, soft, controlled. Deep dramatic shadows fall downward under the chin, brow ridge, and nose. Strong shadow on one side of the face. Soft rim of light on the top of the shoulder and crown of the head. Background wall falls into deep shadow at the edges. No visible light source anywhere in the image. No ceiling visible. Cinematic, low-key, moody. NOT flat studio lighting.'
+    + '\n\nCAMERA: ' + shot.lens + ', f/11 aperture, ' + shot.distance + '. ' + shot.camera + '. EVERYTHING in sharp focus. No depth-of-field blur. No bokeh. Every surface pin sharp.'
+    + '\n\n' + shotConstraints[shotKey]
+    + '\nFRAMING DETAIL: ' + shot.framing
+    + '\nAspect ratio 4:5 portrait.'
+    + '\n\nGARMENTS VISIBLE IN THIS SHOT:\n  -- ' + garmentDesc + hiddenNote
+    + (hasGarmentImages ? '\n\nCRITICAL GARMENT RULE: PDP reference images of the garments are provided. Reproduce them with ABSOLUTE FIDELITY. Every colour, material, texture, seam, button, hardware detail, collar shape, pocket -- everything must match exactly. No creative reinterpretation. No substitutions.' : '')
+    + (layering ? '\n\nLAYERING & FIT: ' + layering : '')
+    + (extra ? '\n\nDIRECTION: ' + extra : '')
+    + editSection
+    + '\n\nCOLOUR & GRADE: Rich dark palette. Deep shadows with retained detail. Warm highlights. Wood wall deep brown. Zegna / Brunello Cucinelli tonal quality. No oversaturation. No HDR.'
+    + '\n\nIMPORTANT: Editorial fashion photography for a luxury menswear brand. Phase One medium format camera. The garments are the hero.';
+
+  return prompt;
+}
+
+// ── GENERATE ──
+async function generate(editNote) {
+  const apiKey = document.getElementById('api-key').value.trim();
+  if (!apiKey || apiKey.length < 15) { alert('Add your Google AI Studio API key first.'); return; }
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.textContent = editNote ? 'Applying edit...' : 'Generating...';
+
+  // Lock pose variation for edits so camera angle/pose doesn't drift
+  const poseOverride = editNote ? currentPoseVariation : null;
+  if (!editNote) {
+    // Pick and store pose for this generation so edits can reuse it
+    const modelKey2 = getModel();
+    const gazeKey2 = getPill('gaze-grid') || 'at-camera';
+    const posePool2 = POSE_VARIATIONS[modelKey2]?.[gazeKey2] || POSE_VARIATIONS[modelKey2]?.['at-camera'];
+    currentPoseVariation = pick(posePool2);
+  }
+  const prompt = buildPrompt(editNote || null, editNote ? currentPoseVariation : null);
+  currentPrompt = prompt;
+
+  const parts = [];
+  const modelKey = getModel().toLowerCase();
+
+  // Model reference photos first
+  refs[modelKey].forEach(r => parts.push({ inline_data: { mime_type: r.mime, data: r.base64 } }));
+  // Setting reference photos
+  refs.setting.forEach(r => parts.push({ inline_data: { mime_type: r.mime, data: r.base64 } }));
+  // Garment images -- all angles per garment
+  garmentSlots.forEach(slot => {
+    (slot.images || []).forEach(img => parts.push({ inline_data: { mime_type: img.mime || 'image/jpeg', data: img.base64 } }));
+  });
+  // ALWAYS include previous image when editing -- it's the source
+  if (editNote && editingHistoryId) {
+    const prev = history.find(h => h.id === editingHistoryId);
+    if (prev?.imageBase64) {
+      parts.push({ inline_data: { mime_type: prev.mime || 'image/png', data: prev.imageBase64 } });
+    }
+  }
+  // Prompt text last
+  parts.push({ text: prompt });
+
+  showGenerating(true);
+
+  try {
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=' + apiKey;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseModalities: ['TEXT', 'IMAGE'] } })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || 'API error ' + res.status);
+    }
+    const data = await res.json();
+    const rp = data?.candidates?.[0]?.content?.parts || [];
+    const imgPart = rp.find(p => p.inlineData);
+    if (!imgPart) throw new Error(rp.find(p => p.text)?.text || 'No image returned.');
+    currentImageData = imgPart.inlineData.data;
+    currentMime = imgPart.inlineData.mimeType;
+    displayCurrentImage('data:' + currentMime + ';base64,' + currentImageData);
+    const entry = {
+      id: Date.now(), imageBase64: currentImageData, mime: currentMime,
+      imageUrl: 'data:' + currentMime + ';base64,' + currentImageData,
+      model: getModel(), shotType: getPill('shot-type-grid'), orient: getPill('orient-grid'),
+      gaze: getPill('gaze-grid'), prompt, ts: new Date(),
+      isEdit: !!editingHistoryId, editOf: editingHistoryId || null,
+      poseVariation: currentPoseVariation
+    };
+    history.unshift(entry);
+    renderHistory();
+    updateResultSub(entry);
+    // Clear edit panel after successful edit
+    if (editNote) {
+      document.getElementById('edit-notes').value = '';
+    }
+  } catch(e) { alert('Generation failed: ' + e.message); }
+
+  showGenerating(false);
+  btn.disabled = false;
+  btn.textContent = 'Generate image';
+}
+
+function showGenerating(show) {
+  let overlay = document.getElementById('gen-overlay');
+  const wrap = document.getElementById('current-wrap');
+  if (!overlay && show) {
+    overlay = document.createElement('div');
+    overlay.id = 'gen-overlay'; overlay.className = 'generating-overlay'; overlay.style.display = 'flex';
+    overlay.innerHTML = `<div class="gen-spinner"></div><div class="gen-label">Generating</div>`;
+    const imgWrap = wrap.querySelector('.current-image-wrap');
+    if (imgWrap) imgWrap.appendChild(overlay); else wrap.appendChild(overlay);
+  } else if (overlay) { overlay.style.display = show ? 'flex' : 'none'; }
+}
+
+function displayCurrentImage(src) {
+  const wrap = document.getElementById('current-wrap');
+  wrap.innerHTML = `<div class="current-image-wrap"><img src="${src}" alt="Generated" onclick="openLightbox('${src}')" /><div class="generating-overlay" id="gen-overlay" style="display:none;"><div class="gen-spinner"></div><div class="gen-label">Generating</div></div></div>`;
+  document.getElementById('image-actions').style.display = 'flex';
+  document.getElementById('prompt-reveal').style.display = 'block';
+  document.getElementById('prompt-box').textContent = currentPrompt;
+}
+
+function updateResultSub(entry) {
+  document.getElementById('result-sub').textContent = `${entry.model} · ${entry.shotType} · ${entry.gaze} · ${entry.ts.toLocaleTimeString()}${entry.isEdit ? ' · edited' : ''}`;
+}
+
+function toggleEditPanel() {
+  const panel = document.getElementById('edit-panel');
+  const isVisible = panel.classList.contains('visible');
+  if (!isVisible) {
+    const last = history[0]; if (!last) return;
+    editingHistoryId = last.id;
+    panel.classList.add('visible');
+    document.getElementById('edit-toggle-btn').textContent = '✕ Cancel edit';
+    document.getElementById('edit-notes').focus();
+  } else {
+    cancelEdit();
+  }
+}
+
+function applyEdit() {
+  const notes = document.getElementById('edit-notes').value.trim();
+  if (!notes) { alert('Please describe what you want to change.'); return; }
+  generate(notes);
+}
+
+function cancelEdit() {
+  editingHistoryId = null;
+  const panel = document.getElementById('edit-panel');
+  panel.classList.remove('visible');
+  document.getElementById('edit-toggle-btn').textContent = '✦ Edit this image';
+  document.getElementById('edit-notes').value = '';
+}
+
+function newImage() { cancelEdit(); }
+
+function loadFromHistory(id) {
+  const entry = history.find(h => h.id === id); if (!entry) return;
+  displayCurrentImage(entry.imageUrl);
+  currentImageData = entry.imageBase64; currentMime = entry.mime; currentPrompt = entry.prompt;
+  document.getElementById('prompt-box').textContent = currentPrompt;
+  updateResultSub(entry);
+  document.getElementById('image-actions').style.display = 'flex';
+  editingHistoryId = id;
+  // Open edit panel
+  const panel = document.getElementById('edit-panel');
+  panel.classList.add('visible');
+  document.getElementById('edit-toggle-btn').textContent = '✕ Cancel edit';
+  document.getElementById('edit-notes').focus();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderHistory() {
+  const grid = document.getElementById('history-grid');
+  document.getElementById('history-count').textContent = history.length + ' image' + (history.length !== 1 ? 's' : '');
+  if (!history.length) { grid.innerHTML = `<div style="font-size:12px;color:var(--grey2);grid-column:1/-1;">Generated images will appear here.</div>`; return; }
+  grid.innerHTML = '';
+  history.forEach(entry => {
+    const div = document.createElement('div'); div.className = 'history-card';
+    const timeStr = entry.ts.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    div.innerHTML = `<img src="${entry.imageUrl}" alt="" onclick="openLightbox('${entry.imageUrl}')" /><div class="history-card-footer"><div class="history-card-meta">${entry.model} · ${entry.shotType}<br>${entry.gaze || entry.orient} · ${timeStr}${entry.isEdit ? '<br>✦ edit' : ''}</div><div class="history-card-actions"><button class="h-btn edit" onclick="loadFromHistory(${entry.id})">Edit</button><button class="h-btn" onclick="downloadFromHistory('${entry.imageUrl}','${entry.model}-${entry.shotType}-${entry.id}.png')">↓</button></div></div>`;
+    grid.appendChild(div);
+  });
+}
+
+function downloadCurrent() {
+  if (!currentImageData) return;
+  const a = document.createElement('a');
+  a.href = `data:${currentMime};base64,${currentImageData}`;
+  a.download = `editorial-${getModel()}-${getPill('shot-type-grid')}-${Date.now()}.png`;
+  a.click();
+}
+
+function downloadFromHistory(url, filename) { const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); }
+let lightboxIndex = 0;
+function openLightbox(src) {
+  lightboxIndex = history.findIndex(h => h.imageUrl === src);
+  if (lightboxIndex === -1) lightboxIndex = 0;
+  showLightboxAt(lightboxIndex);
+  document.getElementById('lightbox').classList.add('open');
+}
+function showLightboxAt(idx) {
+  if (!history.length) return;
+  idx = Math.max(0, Math.min(history.length - 1, idx));
+  lightboxIndex = idx;
+  document.getElementById('lightbox-img').src = history[idx].imageUrl;
+  document.getElementById('lightbox-counter').textContent = history.length > 1 ? `${idx + 1} / ${history.length}` : '';
+  document.querySelector('.lightbox-nav.prev').style.opacity = idx === 0 ? '0.2' : '1';
+  document.querySelector('.lightbox-nav.next').style.opacity = idx === history.length - 1 ? '0.2' : '1';
+}
+function lightboxNav(dir) { showLightboxAt(lightboxIndex + dir); }
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLightbox();
+  if (document.getElementById('lightbox').classList.contains('open')) {
+    if (e.key === 'ArrowLeft') lightboxNav(-1);
+    if (e.key === 'ArrowRight') lightboxNav(1);
+  }
+});
+function togglePrompt() {
+  const box = document.getElementById('prompt-box');
+  const toggle = document.querySelector('.prompt-toggle');
+  const open = box.style.display === 'block';
+  box.style.display = open ? 'none' : 'block';
+  toggle.textContent = open ? 'Show prompt' : 'Hide prompt';
+}
+
+addGarmentSlot();
+loadFromStorage();
+</script>
+</body>
+</html>
