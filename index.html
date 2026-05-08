@@ -150,6 +150,20 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .add-garment-btn { width: 100%; padding: 9px; font-family: var(--font); font-size: 12px; font-weight: 500; background: transparent; color: var(--grey); border: 1.5px dashed var(--grey3); border-radius: var(--r); cursor: pointer; transition: all 0.15s; margin-top: 8px; }
 .add-garment-btn:hover { border-color: var(--orange); color: var(--orange); background: var(--orange-dim); }
 
+/* ─── KIMONO TOGGLE ─── */
+.kimono-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; background: var(--bg); border-radius: var(--r); border: 1.5px solid var(--grey3); cursor: pointer; transition: all 0.15s; user-select: none; margin-top: 2px; }
+.kimono-toggle-row:hover { border-color: var(--orange); }
+.kimono-toggle-row.on { border-color: var(--orange); background: var(--orange-tint); }
+.kimono-toggle-label { font-size: 11px; font-weight: 500; color: var(--grey); display: flex; align-items: center; gap: 7px; }
+.kimono-toggle-row.on .kimono-toggle-label { color: var(--orange); }
+.kimono-toggle-icon { font-size: 10px; }
+.kimono-switch { width: 28px; height: 16px; background: var(--grey3); border-radius: 8px; position: relative; transition: background 0.2s; flex-shrink: 0; }
+.kimono-switch::after { content: ''; position: absolute; width: 12px; height: 12px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: transform 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+.kimono-toggle-row.on .kimono-switch { background: var(--orange); }
+.kimono-toggle-row.on .kimono-switch::after { transform: translateX(12px); }
+.kimono-hint { font-size: 10px; color: var(--grey2); line-height: 1.5; margin-top: 4px; padding: 6px 8px; background: var(--orange-tint); border-radius: var(--r); border: 1px solid rgba(207,90,32,0.15); display: none; }
+.kimono-hint.visible { display: block; }
+
 hr { border: none; border-top: 1px solid var(--grey4); margin: 1.25rem 0; }
 
 /* ─── EDIT BANNER ─── */
@@ -588,11 +602,12 @@ const SHOT_DATA = {
 };
 
 // Which garment categories are visible per shot
-const SHOT_VISIBLE = {
-  'full-body':     ['outerwear','jacket','coat','top','shirt','knitwear','sweater','trouser','pant','jean','short','shoe','boot','sneaker','accessory','belt','scarf','bag'],
-  'medium-top':    ['outerwear','jacket','coat','top','shirt','knitwear','sweater','accessory','scarf','belt'],
-  'medium-bottom': ['trouser','pant','jean','short','shoe','boot','sneaker','belt','accessory'],
-  'close-up':      ['outerwear','jacket','coat','top','shirt','knitwear','sweater','accessory','scarf']
+// Which garment CATEGORIES are visible per shot type
+const SHOT_VISIBLE_CATEGORIES = {
+  'full-body':     ['top', 'bottom', 'footwear', 'accessory', 'other'],
+  'medium-top':    ['top', 'accessory'],
+  'medium-bottom': ['bottom', 'footwear', 'accessory'],
+  'close-up':      ['top', 'accessory']
 };
 
 const ORIENT_DATA = {
@@ -690,7 +705,7 @@ function getPill(gridId) { return document.querySelector(`#${gridId} .pill.activ
 function addGarmentSlot(data) {
   slotCounter++;
   const id = slotCounter;
-  garmentSlots.push({ id, imageBase64: data?.imageBase64||null, imageMime: data?.imageMime||null, imageUrl: data?.imageUrl||null, name: data?.name||'', desc: data?.desc||'', fit: data?.fit||'' });
+  garmentSlots.push({ id, images: [], type: data?.type||'', name: data?.name||'', desc: data?.desc||'', fit: data?.fit||'', construction: data?.construction||'', kimono: data?.kimono||false });
   renderGarmentSlots();
 }
 
@@ -706,32 +721,39 @@ function renderGarmentSlots() {
     const div = document.createElement('div');
     div.className = 'garment-slot';
     const thumbHtml = slot.images && slot.images.length > 0
-      ? `<img class="garment-thumb" src="${slot.images[0].url}" />`
-      : `<div class="garment-thumb-empty">＋</div>`;
-    const imagesHtml = (slot.images || []).map(img => `
-      <div class="garment-img-thumb">
-        <img src="${img.url}" />
-        <div class="garment-img-remove" onclick="removeGarmentImage(${slot.id},${img.id})">✕</div>
-      </div>`).join('');
-    div.innerHTML = `
-      <div class="garment-slot-header">
-        <div class="garment-slot-name">${thumbHtml}<span>${slot.name || 'Garment ' + slot.id}</span></div>
-        <span class="remove-slot" onclick="removeGarmentSlot(${slot.id})">✕</span>
-      </div>
-      <div class="garment-slot-body">
-        <label>PDP images (upload multiple angles)</label>
-        <div class="garment-images-row" id="gimages-${slot.id}">
-          ${imagesHtml}
-          <div class="garment-img-add">
-            <input type="file" accept="image/*" multiple onchange="handleSlotUpload(event,${slot.id})" onclick="event.stopPropagation()" />
-            <div class="garment-img-add-icon">＋</div>
-            <div class="garment-img-add-text">Add</div>
-          </div>
-        </div>
-        <div><label>Garment name / type</label><input type="text" value="${slot.name}" placeholder="e.g. Leather jacket, Wool trousers..." oninput="updateSlot(${slot.id},'name',this.value)" /></div>
-        <div><label>Description</label><textarea placeholder="Colour, material, key details, hardware, stitching..." oninput="updateSlot(${slot.id},'desc',this.value)">${slot.desc}</textarea></div>
-        <div><label>Fit notes</label><input type="text" value="${slot.fit}" placeholder="e.g. relaxed through chest, slightly cropped, wide leg..." oninput="updateSlot(${slot.id},'fit',this.value)" /></div>
-      </div>`;
+      ? '<img class="garment-thumb" src="' + slot.images[0].url + '" />'
+      : '<div class="garment-thumb-empty">+</div>';
+    const imagesHtml = (slot.images || []).map(img =>
+      '<div class="garment-img-thumb"><img src="' + img.url + '" /><div class="garment-img-remove" onclick="removeGarmentImage(' + slot.id + ',' + img.id + ')">x</div></div>'
+    ).join('');
+    const kimonoOn = slot.kimono ? ' on' : '';
+    div.innerHTML =
+      '<div class="garment-slot-header">'
+      + '<div class="garment-slot-name">' + thumbHtml + '<span>' + (slot.name || 'Garment ' + slot.id) + '</span></div>'
+      + '<span class="remove-slot" onclick="removeGarmentSlot(' + slot.id + ')">x</span>'
+      + '</div>'
+      + '<div class="garment-slot-body">'
+      + '<label>PDP images &amp; construction diagrams</label>'
+      + '<div class="garment-images-row" id="gimages-' + slot.id + '">'
+      + imagesHtml
+      + '<div class="garment-img-add"><input type="file" accept="image/*" multiple onchange="handleSlotUpload(event,' + slot.id + ')" onclick="event.stopPropagation()" /><div class="garment-img-add-icon">+</div><div class="garment-img-add-text">Add</div></div>'
+      + '</div>'
+      + '<div><label>Garment type</label>'
+      + '<select onchange="updateSlotType(' + slot.id + ', this.value)">'
+      + GARMENT_TYPES.map(t => '<option value="' + t.value + '"' + (slot.type === t.value ? ' selected' : '') + '>' + t.label + '</option>').join('')
+      + '</select></div>'
+      + '<div><label>Garment name / product name</label><input type="text" value="' + (slot.name||'') + '" placeholder="e.g. Signature Leather Jacket, Wide Leg Trouser..." oninput="updateSlot(' + slot.id + ','name',this.value)" /></div>'
+      + '<div><label>External appearance &amp; details</label><textarea placeholder="Colour, material, surface texture, buttons, hardware, cuffs, collar — visible exterior details only..." oninput="updateSlot(' + slot.id + ','desc',this.value)">' + (slot.desc||'') + '</textarea></div>'
+      + '<div><label>Construction notes</label><textarea placeholder="e.g. No shoulder seams, one-piece front panel, welt pockets only — unusual construction the AI needs to know about..." oninput="updateSlot(' + slot.id + ','construction',this.value)">' + (slot.construction||'') + '</textarea></div>'
+      + '<div><label>Fit &amp; silhouette</label><input type="text" value="' + (slot.fit||'') + '" placeholder="e.g. relaxed through chest, wide at shoulder, slightly cropped..." oninput="updateSlot(' + slot.id + ','fit',this.value)" /></div>'
+      + (isTopGarment(slot.type) ? (
+          '<div class="kimono-toggle-row' + kimonoOn + '" id="kimono-row-' + slot.id + '" onclick="toggleKimono(' + slot.id + ')">'
+          + '<div class="kimono-toggle-label"><span class="kimono-toggle-icon">✂</span> Kimono sleeve construction</div>'
+          + '<div class="kimono-switch"></div>'
+          + '</div>'
+          + '<div class="kimono-hint' + (slot.kimono ? ' visible' : '') + '" id="kimono-hint-' + slot.id + '">Sleeves cut as one piece with front/back panels. One seam: collar → shoulder → full sleeve → cuff. No set-in sleeve seams. No underarm seams. Auto-injected into prompt.</div>'
+        ) : '')
+      + '</div>';
     list.appendChild(div);
   });
 }
@@ -761,6 +783,57 @@ function removeGarmentImage(slotId, imgId) {
 
 function updateSlot(id, field, val) { const s = garmentSlots.find(s => s.id === id); if (s) s[field] = val; }
 
+function updateSlotType(id, type) {
+  const slot = garmentSlots.find(s => s.id === id); if (!slot) return;
+  slot.type = type;
+  // If switching to a non-top, turn off kimono
+  if (!isTopGarment(type)) slot.kimono = false;
+  renderGarmentSlots();
+}
+
+function toggleKimono(id) {
+  const slot = garmentSlots.find(s => s.id === id); if (!slot) return;
+  slot.kimono = !slot.kimono;
+  const row = document.getElementById('kimono-row-' + id);
+  const hint = document.getElementById('kimono-hint-' + id);
+  if (row) row.classList.toggle('on', slot.kimono);
+  if (hint) hint.classList.toggle('visible', slot.kimono);
+}
+
+// Garment type definitions
+const GARMENT_TYPES = [
+  { value: '', label: 'Select type...' },
+  { value: 'jacket', label: 'Jacket', category: 'top' },
+  { value: 'overcoat', label: 'Overcoat', category: 'top' },
+  { value: 'blazer', label: 'Blazer', category: 'top' },
+  { value: 'knitwear', label: 'Knitwear', category: 'top' },
+  { value: 'hoodie', label: 'Hoodie', category: 'top' },
+  { value: 'sweatshirt', label: 'Sweatshirt', category: 'top' },
+  { value: 'button-down', label: 'Button-down shirt', category: 'top' },
+  { value: 'shirt', label: 'Shirt', category: 'top' },
+  { value: 't-shirt', label: 'T-shirt', category: 'top' },
+  { value: 'vest', label: 'Vest / Waistcoat', category: 'top' },
+  { value: 'jeans', label: 'Jeans', category: 'bottom' },
+  { value: 'trousers', label: 'Trousers', category: 'bottom' },
+  { value: 'shorts', label: 'Shorts', category: 'bottom' },
+  { value: 'shoes', label: 'Shoes', category: 'footwear' },
+  { value: 'boots', label: 'Boots', category: 'footwear' },
+  { value: 'sneakers', label: 'Sneakers', category: 'footwear' },
+  { value: 'accessory', label: 'Accessory', category: 'accessory' },
+  { value: 'bag', label: 'Bag', category: 'accessory' },
+  { value: 'scarf', label: 'Scarf', category: 'accessory' },
+  { value: 'other', label: 'Other', category: 'other' },
+];
+
+function getGarmentCategory(type) {
+  const match = GARMENT_TYPES.find(t => t.value === type);
+  return match ? match.category : 'other';
+}
+
+function isTopGarment(type) {
+  return getGarmentCategory(type) === 'top';
+}
+
 // ── PROMPT BUILDER ──
 // poseVariationOverride: if set, use this pose instead of picking randomly (for edits)
 function buildPrompt(editNote, poseVariationOverride) {
@@ -781,22 +854,27 @@ function buildPrompt(editNote, poseVariationOverride) {
     : gazeKey === 'down' ? 'gaze directed downward'
     : 'looking off frame, away from camera';
 
-  // Shot-aware garment filtering
-  const visibleKeywords = SHOT_VISIBLE[shotKey] || SHOT_VISIBLE['full-body'];
+  // Shot-aware garment filtering by category
+  const visibleCategories = SHOT_VISIBLE_CATEGORIES[shotKey] || SHOT_VISIBLE_CATEGORIES['full-body'];
   const visibleSlots = garmentSlots.filter(slot => {
-    if (!slot.name) return true;
-    const n = slot.name.toLowerCase();
-    return visibleKeywords.some(k => n.includes(k));
+    if (!slot.type) return true; // include untyped garments always
+    const cat = getGarmentCategory(slot.type);
+    return visibleCategories.includes(cat);
   });
   const hiddenSlots = garmentSlots.filter(s => !visibleSlots.includes(s));
 
+  const KIMONO_DESC = 'SLEEVE CONSTRUCTION -- KIMONO: The sleeve is cut as one continuous piece with the front and back body panels (not set in). There is one long seam running from the collar point, across the top of the shoulder, and down the full length of the sleeve to the cuff. There are NO set-in sleeve seams. There are NO underarm seams. There are NO separate shoulder seams. Render ONLY these seams -- do not add any others.';
+
   const garmentDesc = visibleSlots.length > 0
     ? visibleSlots.map(s => {
-        let d = s.name || 'garment';
-        if (s.desc) d += ': ' + s.desc;
-        if (s.fit) d += ' (fit: ' + s.fit + ')';
+        const typLabel = s.type ? GARMENT_TYPES.find(t => t.value === s.type)?.label || s.type : '';
+        let d = '\n  GARMENT: ' + (typLabel ? typLabel + (s.name ? ' -- ' + s.name : '') : (s.name || 'garment'));
+        if (s.desc) d += '\n  EXTERIOR APPEARANCE (visible surface details only): ' + s.desc;
+        if (s.construction) d += '\n  CONSTRUCTION (follow exactly): ' + s.construction;
+        if (s.kimono && isTopGarment(s.type)) d += '\n  ' + KIMONO_DESC;
+        if (s.fit) d += '\n  FIT (this is mandatory -- the silhouette MUST match exactly): ' + s.fit;
         return d;
-      }).join('\n  -- ')
+      }).join('\n')
     : 'Clothing to be determined from uploaded reference images.';
 
   const hiddenNote = hiddenSlots.length > 0
@@ -832,9 +910,9 @@ function buildPrompt(editNote, poseVariationOverride) {
     + '\n\n' + shotConstraints[shotKey]
     + '\nFRAMING DETAIL: ' + shot.framing
     + '\nAspect ratio 4:5 portrait.'
-    + (hasGarmentImages ? '\n\nGARMENT REFERENCE IMAGES ARE PROVIDED. These images are for visual reference only -- use them to understand the exact colour, material, texture, and external silhouette of each garment. CRITICAL RULES for using these references:\n1. Reproduce the EXACT colour and material as shown -- no creative reinterpretation.\n2. Reproduce the EXACT silhouette and fit as shown in the PDP -- do not add or remove design elements.\n3. DO NOT reproduce any interior details, brand labels, care tags, or internal construction -- these are never visible in a worn garment. Labels inside a collar are not visible from outside.\n4. DO NOT add seams, stitching lines, or construction details that are not visible on the exterior of the garment in the PDP image.\n5. Render the garment as it would naturally look when worn by the model -- not as a product shot.' : '')
+    + (hasGarmentImages ? '\n\nGARMENT REFERENCE IMAGES ARE PROVIDED (PDP flatlays and/or construction diagrams). CRITICAL RULES:\n1. Reproduce the EXACT colour, material, and surface texture shown in the PDP -- no reinterpretation.\n2. Reproduce the EXACT silhouette and proportions -- do not alter the shape.\n3. Construction is defined SOLELY by the construction notes and any diagrams provided. Do not assume or infer construction details from the garment type name. A garment described as a jacket may have completely different construction to a conventional jacket -- follow only what is described.\n4. If a construction diagram is provided, it is a technical specification. Follow it exactly.\n5. DO NOT show interior details, brand labels, or care tags -- never visible on a worn garment.\n6. DO NOT add seams, stitching, or structural lines not described in the construction notes or visible on the exterior in the PDP.\n7. Render the garment as it looks when worn naturally.' : '')
     + '\n\nGARMENTS VISIBLE IN THIS SHOT:\n  -- ' + garmentDesc + hiddenNote
-    + (layering ? '\n\nFIT & LAYERING (MUST BE RESPECTED EXACTLY): ' + layering : '')
+    + (layering ? '\n\nFIT & LAYERING (MANDATORY -- THE SILHOUETTE MUST MATCH THIS EXACTLY. THIS OVERRIDES ANY DEFAULT ASSUMPTIONS ABOUT HOW THIS GARMENT TYPE FITS): ' + layering : '')
     + (extra ? '\n\nDIRECTION: ' + extra : '')
     + editSection
     + '\n\nCOLOUR & GRADE: Rich dark palette. Deep shadows with retained detail. Warm highlights. Wood wall deep brown. Zegna / Brunello Cucinelli tonal quality. No oversaturation. No HDR.'
