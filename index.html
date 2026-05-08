@@ -832,9 +832,9 @@ function buildPrompt(editNote, poseVariationOverride) {
     + '\n\n' + shotConstraints[shotKey]
     + '\nFRAMING DETAIL: ' + shot.framing
     + '\nAspect ratio 4:5 portrait.'
+    + (hasGarmentImages ? '\n\nGARMENT REFERENCE IMAGES ARE PROVIDED. These images are for visual reference only -- use them to understand the exact colour, material, texture, and external silhouette of each garment. CRITICAL RULES for using these references:\n1. Reproduce the EXACT colour and material as shown -- no creative reinterpretation.\n2. Reproduce the EXACT silhouette and fit as shown in the PDP -- do not add or remove design elements.\n3. DO NOT reproduce any interior details, brand labels, care tags, or internal construction -- these are never visible in a worn garment. Labels inside a collar are not visible from outside.\n4. DO NOT add seams, stitching lines, or construction details that are not visible on the exterior of the garment in the PDP image.\n5. Render the garment as it would naturally look when worn by the model -- not as a product shot.' : '')
     + '\n\nGARMENTS VISIBLE IN THIS SHOT:\n  -- ' + garmentDesc + hiddenNote
-    + (hasGarmentImages ? '\n\nCRITICAL GARMENT RULE: PDP reference images of the garments are provided. Reproduce them with ABSOLUTE FIDELITY. Every colour, material, texture, seam, button, hardware detail, collar shape, pocket -- everything must match exactly. No creative reinterpretation. No substitutions.' : '')
-    + (layering ? '\n\nLAYERING & FIT: ' + layering : '')
+    + (layering ? '\n\nFIT & LAYERING (MUST BE RESPECTED EXACTLY): ' + layering : '')
     + (extra ? '\n\nDIRECTION: ' + extra : '')
     + editSection
     + '\n\nCOLOUR & GRADE: Rich dark palette. Deep shadows with retained detail. Warm highlights. Wood wall deep brown. Zegna / Brunello Cucinelli tonal quality. No oversaturation. No HDR.'
@@ -867,20 +867,19 @@ async function generate(editNote) {
   const parts = [];
   const modelKey = getModel().toLowerCase();
 
-  // Model reference photos first
-  refs[modelKey].forEach(r => parts.push({ inline_data: { mime_type: r.mime, data: r.base64 } }));
-  // Setting reference photos
-  refs.setting.forEach(r => parts.push({ inline_data: { mime_type: r.mime, data: r.base64 } }));
-  // Garment images -- all angles per garment
-  garmentSlots.forEach(slot => {
-    (slot.images || []).forEach(img => parts.push({ inline_data: { mime_type: img.mime || 'image/jpeg', data: img.base64 } }));
-  });
-  // ALWAYS include previous image when editing -- it's the source
   if (editNote && editingHistoryId) {
+    // EDIT MODE: send only the previous image as source -- much faster, garments already baked in
     const prev = history.find(h => h.id === editingHistoryId);
     if (prev?.imageBase64) {
       parts.push({ inline_data: { mime_type: prev.mime || 'image/png', data: prev.imageBase64 } });
     }
+  } else {
+    // NEW GENERATION: send all references
+    refs[modelKey].forEach(r => parts.push({ inline_data: { mime_type: r.mime, data: r.base64 } }));
+    refs.setting.forEach(r => parts.push({ inline_data: { mime_type: r.mime, data: r.base64 } }));
+    garmentSlots.forEach(slot => {
+      (slot.images || []).forEach(img => parts.push({ inline_data: { mime_type: img.mime || 'image/jpeg', data: img.base64 } }));
+    });
   }
   // Prompt text last
   parts.push({ text: prompt });
